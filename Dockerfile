@@ -1,19 +1,17 @@
 # syntax=docker/dockerfile:1
-# Build
+# Build container
 FROM golang:1.18-buster AS build
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
+COPY . .
 RUN go mod download
+RUN go mod verify
 
-COPY *.go ./
+RUN CGO_ENABLED=0 go build -o /go-docker
 
-RUN go build -o /go-docker
-
-## Release
-FROM gcr.io/distroless/base-debian10
+## Release container
+FROM gcr.io/distroless/static-debian11
 ENV GIN_MODE=release                                                                                                    
 
 WORKDIR /
